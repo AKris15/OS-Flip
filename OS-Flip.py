@@ -462,7 +462,7 @@ def main():
 
         print(f"""\n{Fore.CYAN}⚙️  Options:
   1. Set default boot OS
-  2. Reboot into another OS
+  2. Flip OS
   3. Exit{Style.RESET_ALL}""")
 
         try:
@@ -487,7 +487,7 @@ def main():
                     print_info(f"Current default: {current_default}")
                     if set_linux_default_os(selected_os):
                         print_success(f"Default OS set to: {selected_os}")
-                        reboot = input("🔁 Reboot now? (y/N): ").strip().lower()
+                        reboot = input("🔁 Flip now? (y/N): ").strip().lower()
                         if reboot == "y":
                             subprocess.run(["reboot"])
                 elif option == 2:
@@ -503,7 +503,7 @@ def main():
                     print_info(f"Current default: {current_default}")
                     if set_windows_default_os(selected_id):
                         print_success(f"Default OS set to: {selected_os}")
-                        reboot = input("🔁 Reboot now? (y/N): ").strip().lower()
+                        reboot = input("🔁 Flip now? (y/N): ").strip().lower()
                         if reboot == "y":
                             subprocess.run(["shutdown", "/r", "/t", "0"])
                 elif option == 2:
@@ -519,7 +519,7 @@ def main():
                     print_info(f"Current default: {current_default}")
                     if set_macos_default_os(selected_id):
                         print_success(f"Default OS set to: {selected_os}")
-                        reboot = input("🔁 Reboot now? (y/N): ").strip().lower()
+                        reboot = input("🔁 Flip now? (y/N): ").strip().lower()
                         if reboot == "y":
                             reboot_macos()
                 elif option == 2:
