@@ -10,7 +10,7 @@
 
 - 🔍 View all bootable OS entries
 - ✅ Set a default OS for future boots
-- 🔁 Temporarily reboot into another OS (“Flip”)
+- 🔁 Temporarily Flips into another OS (“Flip”)
 
 It works on:
 
@@ -29,8 +29,6 @@ Whether you're switching between Linux and Windows or managing a Boot Camp setup
 - ✅ Sets permanent default OS
 - 🔁 Flips (reboots) temporarily into another OS
 - 📁 Logs activity to platform-specific log file
-- 💬 Color-coded terminal messages
-- 🖥️ Launches in a new terminal window (if needed)
 
 ---
 
@@ -155,4 +153,4 @@ Useful for debugging or audit trails.
 
 ## 📜 License
 
-MIT License
+MIT License (modified)
