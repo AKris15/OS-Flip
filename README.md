@@ -51,13 +51,6 @@ os-flip       # On Windows (admin)
 
 > Requires Python 3.6+
 
-### 📥 Windows `.exe` (no Python required)
-
-[➡️ Download from GitHub Releases](https://github.com/AKris15/OS-Flip/releases/latest/download/Os-Flip.exe)
-
-> Right-click → Run as Administrator
-> May trigger SmartScreen warning (unsigned binary)
-
 ---
 
 ## 📋 Requirements
@@ -146,7 +139,6 @@ MIT Licensed — attribution appreciated!
 ## 🔗 Related Links
 
 * 📦 [PyPI Package](https://pypi.org/project/os-flip)
-* 🪟 [Windows `.exe` Download](https://github.com/AKris15/OS-Flip/releases/latest/download/Os-Flip.exe)
 * 🐛 [Issue Tracker](https://github.com/AKris15/OS-Flip/issues)
 
 ````
