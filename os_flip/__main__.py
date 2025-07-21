@@ -472,6 +472,7 @@ def main():
                 return
             if option == 3:
                 print_info("Exiting OS Flip.")
+                sys.exit(0)
                 return
 
             choice = int(input("Select OS number: ").strip()) - 1
