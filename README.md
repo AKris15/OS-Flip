@@ -1,65 +1,53 @@
 # OS Flip 🌀
 
-*A simple script to switch your default OS at boot time*
+*A multi-platform script to view and switch your default boot OS across Linux, Windows, and macOS.*
 
-## Overview
+## ✨ Overview
 
-**OS Flip** is a Python script that lets you view, select, and switch the default boot OS using GRUB on dual-boot Linux systems. Whether you're temporarily booting into another OS or setting a new default, this script makes it easy from the terminal.
+**OS Flip** is a cross-platform Python script that helps you:
 
-## Features
+- View bootable OS entries
+- Set the **default OS** for future boots
+- Flip into another OS temporarily
 
-* 🔍 Lists all available GRUB boot entries
-* ✅ Set a default OS for future boots
-* 🚀 Option to just reboot into another OS once
-* 🛡️ Root check to avoid permission errors
-* 🧠 Auto-detects GRUB update command based on your Linux distro
+It works on:
+- ✅ Linux (GRUB-based bootloaders)
+- ✅ Windows (via `bcdedit`)
+- ⚠️ macOS (via `bless`, **not fully tested**)
 
-## Requirements
+Whether you dual-boot Linux and Windows or use macOS with Boot Camp, OS Flip gives you a simple terminal UI to control boot behavior.
 
-* Python 3
-* A Linux system using GRUB
-* Root privileges (`sudo`)
+---
 
-## Usage
+## ⚙️ Features
 
+- 🧠 Auto-detects OS and privileges
+- 🔍 Lists available boot entries
+- ✅ Set a default OS
+- 🔁 Flips OS
+- 💬 Color-coded terminal output
+- 🧾 Logging to platform-specific log files
+---
+
+## 📦 Requirements
+
+### 🐧 Linux:
+- Python 3
+- GRUB2 bootloader
+- `update-grub` or `grub2-mkconfig`
+- `os-prober`
+- `sudo` or root access
+
+### 🪟 Windows:
+- Python 3
+- Run as Administrator
+- Access to `bcdedit` (built-in on Windows)
+
+### 🍎 macOS (**not fully tested**):
+- Python 3
+- `diskutil`, `systemsetup`, `bless`
+- Run with `sudo`
+
+> ✅ `colorama` Python package is used for colored output. Install with:
 ```bash
-sudo python3 OS\ Flip.py
-```
-
-### Menu Options
-
-1. **Set default boot OS**
-   Permanently changes the GRUB default to the selected OS.
-
-2. **Just boot into another**
-   Temporarily boots into a different OS on the next reboot.
-
-3. **Exit**
-   Quits the script.
-
-## Example Output
-
-```
-=== Available Boot Entries ===
-1. Ubuntu
-2. Windows Boot Manager (on /dev/sda1)
-
-Options:
-1. Set default boot OS
-2. Just boot into another
-3. Exit
-```
-
-## Notes
-
-* This script modifies `/etc/default/grub` and runs `update-grub` or `grub2-mkconfig`, depending on your distro.
-* Make sure GRUB is configured correctly and backed up if needed before changing defaults.
-
-## Tested On
-
-* Debian-based systems (Ubuntu, Pop!\_OS)
-* Red Hat-based systems (Fedora)
-
-## Disclaimer
-
-Use at your own risk. While the script is designed to be safe, messing with bootloaders can be risky if done carelessly.
+pip install colorama
