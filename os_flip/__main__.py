@@ -77,7 +77,7 @@ def launch_in_new_terminal():
     script_path = os.path.abspath(__file__)
     
     if current_os == "Windows":
-        subprocess.Popen(["start", "cmd", "/k", "python", f'"{script_path}"', "--no-terminal-launch"], shell=True)
+        subprocess.Popen(f'start cmd /k python "{script_path}" --no-terminal-launch', shell=True)
         sys.exit(0)
     elif current_os == "Darwin":
         subprocess.Popen([
