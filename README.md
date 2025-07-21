@@ -1,86 +1,92 @@
 # OS Flip 🌀
 
-*A multi-platform script to view and switch your default boot OS across Linux, Windows, and macOS.*
+*A cross-platform terminal tool to view, set, and flip your default boot OS on Linux, Windows, and macOS.*
 
 ---
 
 ## ✨ Overview
 
-**OS Flip** is a cross-platform Python utility to manage boot preferences on dual-boot or multi-boot systems. It allows you to:
+**OS Flip** is a Python-based utility to manage boot preferences across dual-boot or multi-boot systems. Whether you're switching between Linux and Windows or managing a macOS Boot Camp setup, OS Flip gives you a simple terminal UI to:
 
-- 🔍 View all bootable OS entries
-- ✅ Set a default OS for future boots
-- 🔁 Temporarily Flips into another OS (“Flip”)
+- 🔍 View bootable OS entries
+- ✅ Set the **default OS**
+- 🔁 Temporarily Flips into another OS
 
-It works on:
+---
 
-- 🐧 **Linux** (GRUB-based)
+## 🖥️ Platforms Supported
+
+- 🐧 **Linux** (GRUB2)
 - 🪟 **Windows** (`bcdedit`)
-- 🍎 **macOS** (`bless`) – ⚠️ *experimental and not fully tested*
-
-Whether you're switching between Linux and Windows or managing a Boot Camp setup, **OS Flip** offers a simple, colorful terminal UI to handle it.
+- 🍎 **macOS** (`bless`) — *experimental*
 
 ---
 
 ## ⚙️ Features
 
-- 🧠 Auto-detects operating system
-- 🔍 Lists all available boot entries
-- ✅ Sets permanent default OS
-- 🔁 Flips (reboots) temporarily into another OS
-- 📁 Logs activity to platform-specific log file
+- 🧠 Auto-detects current OS
+- 📜 Lists all boot entries
+- ✅ Set permanent default boot entry
+- 🔁 Flip OS temporarily
+- 💬 Color-coded terminal UI
+- 📁 Logs activity to a platform-specific log file
+- 🪟 [Windows `.exe` version available](https://github.com/AKris15/OS-Flip/releases/latest)
 
 ---
 
-## 📦 Requirements
+## 📦 Installation
 
-### 🐧 Linux:
-- Python 3
-- GRUB2 bootloader
-- `update-grub` or `grub2-mkconfig`
-- `os-prober`
-- Run with `sudo` or as root
+### ✅ Via pip (All Platforms)
 
-### 🪟 Windows:
-- Python 3
-- Run as Administrator
-- `bcdedit` (pre-installed on Windows)
-
-### 🍎 macOS (**experimental**):
-- Python 3
-- `diskutil`, `systemsetup`, `bless`
-- Run with `sudo`
-
-> ✅ Install Python dependency:
 ```bash
-pip install colorama
+pip install os-flip
 ````
 
----
-
-## 🚀 Usage
-
-Run the script with elevated privileges:
-
-### On Linux/macOS:
+Then run:
 
 ```bash
-sudo python3 os_flip.py
+sudo os-flip  # On Linux/macOS
+os-flip       # On Windows (admin)
 ```
 
-### On Windows:
+> Requires Python 3.6+
 
-Run Command Prompt or PowerShell **as Administrator**, then:
+### 📥 Windows `.exe` (no Python required)
 
-```cmd
-python os_flip.py
-```
+[➡️ Download from GitHub Releases](https://github.com/AKris15/OS-Flip/releases/latest/download/Os-Flip.exe)
+
+> Right-click → Run as Administrator
+> May trigger SmartScreen warning (unsigned binary)
 
 ---
 
-## 🧪 Example Output
+## 📋 Requirements
 
-```
+### Linux:
+
+* Python 3
+* GRUB2 bootloader
+* `os-prober`, `update-grub` or `grub2-mkconfig`
+* `sudo` or root privileges
+
+### Windows:
+
+* Python 3 (for pip version)
+* Admin privileges
+* `bcdedit` access
+
+### macOS:
+
+* Python 3
+* Tools: `diskutil`, `systemsetup`, `bless`
+* Run with `sudo`
+* ⚠️ SIP and volume restrictions may apply
+
+---
+
+## 🚀 Example Output
+
+```text
    ____   _____          ______ _      _____ _____ 
   / __ \ / ____|        |  ____| |    |_   _|  __ \
  | |  | | (___    ___   | |__  | |      | | | |__) |
@@ -89,11 +95,7 @@ python os_flip.py
   \____/|_____/         |_|    |______|_____|_|   
 
          Welcome to OS FLIP 
-                         By - AK (Linux)
-
-ℹ️  Backed up GRUB config to /etc/default/grub.bak.1753056275  
-✅ os-prober enabled.  
-ℹ️  Updating GRUB entries... done
+                         By - AK (Your OS)
 
 📜 Available Boot Entries:
   1. Windows Boot Manager (on /dev/nvme0n1p1) (Current Default)
@@ -107,50 +109,44 @@ python os_flip.py
 
 ---
 
-## 📂 Log Files
+## 📂 Log Location
 
-Activity is logged to a file based on your OS:
-
-* **Linux/macOS:** `/tmp/os_flip_<username>.log`
-* **Windows:** `%TEMP%\os_flip_<username>.log`
-
-Useful for debugging or audit trails.
-
----
-
-## 📌 Notes
-
-* Linux: Edits `/etc/default/grub`, then runs `update-grub` or `grub2-mkconfig`
-* macOS: Uses `bless` to set the startup disk (requires SIP-safe paths)
-* Windows: Uses `bcdedit` to read/set boot configuration
-* The script auto-launches in a new terminal if not already interactive
-* GRUB backup is created before changes (`/etc/default/grub.bak.<timestamp>`)
+| OS      | Log File Path                   |
+| ------- | ------------------------------- |
+| Linux   | `/tmp/os_flip_<username>.log`   |
+| macOS   | `/tmp/os_flip_<username>.log`   |
+| Windows | `%TEMP%\os_flip_<username>.log` |
 
 ---
 
-## 🧪 Tested Platforms
+## 🧪 Tested On
 
-| OS            | Status            |
-| ------------- | ----------------- |
-| Ubuntu        | ✅ Confirmed       |
-| Fedora        | ✅ Confirmed       |
-| Windows 10/11 | ✅ Confirmed       |
-| macOS (Intel) | ⚠️ *Experimental* |
+| OS            | Status          |
+| ------------- | --------------- |
+| Ubuntu 22.04  | ✅ Confirmed     |
+| Fedora 40     | ✅ Confirmed     |
+| Windows 10/11 | ✅ Confirmed     |
+| macOS (Intel) | ⚠️ Experimental |
 
 ---
 
-## 🛑 Disclaimer
+## 🚧 Disclaimer
 
-> Use at your own risk. Modifying bootloader settings can affect system startup. Ensure you understand the implications, especially on production or encrypted systems.
+> ⚠️ Use at your own risk. Editing bootloader configs may prevent systems from booting. Always back up and know what you're changing.
 
 ---
 
 ## 👨‍💻 Author
 
-**AK** – [github.com/AKris15](https://github.com/AKris15)
+Made with ❤️ by **[AK](https://github.com/AKris15)**
+MIT Licensed — attribution appreciated!
 
 ---
 
-## 📜 License
+## 🔗 Related Links
 
-MIT License (modified)
+* 📦 [PyPI Package](https://pypi.org/project/os-flip)
+* 🪟 [Windows `.exe` Download](https://github.com/AKris15/OS-Flip/releases/latest/download/Os-Flip.exe)
+* 🐛 [Issue Tracker](https://github.com/AKris15/OS-Flip/issues)
+
+````
