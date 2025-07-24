@@ -213,18 +213,17 @@ def get_linux_boot_entries():
     grub_path = next((p for p in grub_cfgs if Path(p).exists()), None)
     if grub_path:
         try:
-            output = subprocess.check_output(["grep", "^menuentry", grub_path], text=True)
-            for line in output.splitlines():
-                parts = line.split("'")
-                if len(parts) >= 2:
-                    title = parts[1]
-                    label = "Fedora Linux" if "Fedora" in title else title
-                    if label not in seen:
-                        entries.append(label)
-                        seen.add(label)
-        except subprocess.CalledProcessError:
+            with open(grub_path, "r") as f:
+                for line in f:
+                    if line.strip().startswith("menuentry "):
+                        # Extract exact title including quotes
+                        title = line.split("'")[1]
+                        if title not in seen:
+                            entries.append(title)
+                            seen.add(title)
+        except Exception:
             pass
-
+        
     bls_dir = Path("/boot/loader/entries")
     if bls_dir.exists():
         for entry in bls_dir.glob("*.conf"):
@@ -492,9 +491,23 @@ def main():
                         if reboot == "y":
                             subprocess.run(["reboot"])
                 elif option == 2:
-                    print_info(f"Rebooting into: {selected_os}...")
-                    if set_linux_default_os(selected_os):
+                    print_info(f"Flip into: {selected_os}")
+                    # Use title instead of index
+                    grub_reboot_cmd = shutil.which("grub-reboot") or shutil.which("grub2-reboot")
+                    
+                    if not grub_reboot_cmd:
+                        print_error("❌ Neither 'grub-reboot' nor 'grub2-reboot' found")
+                        print_info("💡 Install with: sudo apt install grub2-common (Debian) or sudo dnf install grub2-tools (Fedora)")
+                        return
+
+                    try:
+                        # Pass the exact menu entry title
+                        subprocess.run([grub_reboot_cmd, selected_os], check=True)
+                        print_success("Temporary boot set. Rebooting...")
                         subprocess.run(["reboot"])
+                    except subprocess.CalledProcessError as e:
+                        print_error(f"Failed to set temporary boot: {e}")
+                        
             elif current_os == "Windows":
                 selected_os = entries[choice]
                 selected_id = identifiers[choice]
