@@ -1,52 +1,49 @@
-# OS Flip 🌀
+# OS-Flip 🌀
 
-*A cross-platform terminal tool to view, set, and flip your default boot OS on Linux, Windows, and macOS.*
+*A Linux terminal tool to view, set, and flip your default boot OS.*
 
 ---
 
 ## ✨ Overview
 
-**OS Flip** is a Python-based utility to manage boot preferences across dual-boot or multi-boot systems. Whether you're switching between Linux and Windows or managing a macOS Boot Camp setup, OS Flip gives you a simple terminal UI to:
+**OS Flip** is a Python-based utility to manage boot preferences on Linux systems using GRUB2. Whether you're running a dual-boot setup or switching between multiple Linux distributions, OS Flip gives you a simple terminal UI to:
 
-- 🔍 View bootable OS entries
-- ✅ Set the **default OS**
-- 🔁 Temporarily Flips into another OS
+* 🔍 View bootable OS entries
+* ✅ Set the **default OS**
+* 🔁 Temporarily flip into another OS for one-time boot
 
 ---
 
 ## 🖥️ Platforms Supported
 
-- 🐧 **Linux** (GRUB2)
-- 🪟 **Windows** (`bcdedit`)
-- 🍎 **macOS** (`bless`) — *experimental*
+* 🐧 **Linux only** (GRUB2-based bootloaders)
+
+> Windows and macOS are **not supported**. Windows does not allow GRUB changes, and macOS/Boot Camp setups are incompatible. Any Linux distribution should manage BIOS/UEFI defaults through firmware settings.
 
 ---
 
 ## ⚙️ Features
 
-- 🧠 Auto-detects current OS
-- 📜 Lists all boot entries
-- ✅ Set permanent default boot entry
-- 🔁 Flip OS temporarily
-- 💬 Color-coded terminal UI
-- 📁 Logs activity to a platform-specific log file
-- 🪟 [Windows `.exe` version available](https://github.com/AKris15/OS-Flip/releases/latest)
+* 🧠 Auto-detects current OS
+* 📜 Lists all GRUB boot entries
+* ✅ Set permanent default boot entry
+* 🔁 Flip OS temporarily (one-time boot)
+* 📁 Logs activity to a Linux-specific log file
 
 ---
 
 ## 📦 Installation
 
-### ✅ Via pip (All Platforms)
+### **Requires root/sudo**
 
 ```bash
-pip install os-flip
-````
+sudo pip install os-flip
+```
 
 Then run:
 
 ```bash
-sudo os-flip  # On Linux/macOS
-os-flip       # On Windows (admin)
+sudo os-flip
 ```
 
 > Requires Python 3.6+
@@ -55,25 +52,10 @@ os-flip       # On Windows (admin)
 
 ## 📋 Requirements
 
-### Linux:
-
 * Python 3
 * GRUB2 bootloader
 * `os-prober`, `update-grub` or `grub2-mkconfig`
 * `sudo` or root privileges
-
-### Windows:
-
-* Python 3 (for pip version)
-* Admin privileges
-* `bcdedit` access
-
-### macOS:
-
-* Python 3
-* Tools: `diskutil`, `systemsetup`, `bless`
-* Run with `sudo`
-* ⚠️ SIP and volume restrictions may apply
 
 ---
 
@@ -91,8 +73,8 @@ os-flip       # On Windows (admin)
                          By - AK (Your OS)
 
 📜 Available Boot Entries:
-  1. Windows Boot Manager (on /dev/nvme0n1p1) (Current Default)
-  2. Fedora Linux
+  1. Fedora Linux (Current Default)
+  2. Windows Boot Manager (on /dev/nvme0n1p1)
 
 ⚙️  Options:
   1. Set default boot OS
@@ -102,26 +84,57 @@ os-flip       # On Windows (admin)
 
 ---
 
+## 📝 Custom Shortcuts (Advanced)
+
+### 1. Using a Text File
+
+You can automate OS Flip actions using a simple **text file shortcut**.
+For example, create a text file named `win_boot.txt` containing:
+
+```
+2
+1
+y
+```
+
+**Meaning:**
+
+* `2` → Choose **Flip OS**
+* `1` → Select OS option `1` (e.g., Windows Boot Manager) for **one-time boot**
+* `y` → Confirm and reboot immediately
+
+Run it with:
+
+```bash
+sudo os-flip < win_boot.txt
+```
+
+---
+
+### 2. Create a Quick Command (Alias)
+
+To make this even faster, add a shortcut to your shell configuration file (`~/.bashrc`, `~/.zshrc`, etc.):
+
+```bash
+alias flip='sudo os-flip < /path/to/win_boot.txt'
+```
+
+After saving and reloading your shell (`source ~/.bashrc`), just type:
+
+```bash
+flip
+```
+
+…and your system will **instantly flip and reboot into the selected OS**.
+
+---
+
 ## 📂 Log Location
 
-| OS      | Log File Path                   |
-| ------- | ------------------------------- |
-| Linux   | `/tmp/os_flip_<username>.log`   |
-| macOS   | `/tmp/os_flip_<username>.log`   |
-| Windows | `%TEMP%\os_flip_<username>.log` |
+| OS    | Log File Path                 |
+| ----- | ----------------------------- |
+| Linux | `/tmp/os_flip_<username>.log` |
 
----
-
-## 🧪 Tested On
-
-| OS            | Status          |
-| ------------- | --------------- |
-| Ubuntu 22.04  | ✅ Confirmed     |
-| Fedora 40     | ✅ Confirmed     |
-| Windows 10/11 | ✅ Confirmed     |
-| macOS (Intel) | ⚠️ Experimental |
-
----
 
 ## 🚧 Disclaimer
 
@@ -140,5 +153,3 @@ MIT Licensed — attribution appreciated!
 
 * 📦 [PyPI Package](https://pypi.org/project/os-flip)
 * 🐛 [Issue Tracker](https://github.com/AKris15/OS-Flip/issues)
-
-````
