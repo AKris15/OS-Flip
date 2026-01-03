@@ -11,10 +11,18 @@ import plistlib
 import shutil
 import ctypes
 
-# External
-from colorama import init, Fore, Style
+from arguments import *
+args = parser.parse_args()
 
-init(autoreset=True)
+# Color Codes
+RED = '\033[91m'
+GREEN = '\033[92m'
+BLUE = '\033[94m'
+RESET = '\033[0m'
+YELLOW = '\033[93m'
+MAGENTA = '\033[95m'
+CYAN = '\033[96m'
+RESET = '\033[0m'
 
 # --- Constants ---
 LOG_FILE = (
@@ -34,27 +42,27 @@ def log(message):
         with open(path, "a") as f:
             f.write(f"[{datetime.now()}] {message}\n")
     except PermissionError:
-        print(f"{Fore.RED}⚠️ Cannot write to log at {path}. Logging disabled.")
+        print(f"{RED}⚠️ Cannot write to log at {path}. Logging disabled.{RESET}")
 
 # --- Print Helpers ---
-def print_success(msg): print(f"{Fore.GREEN}✅ {msg}"); log(f"SUCCESS: {msg}")
-def print_info(msg): print(f"{Fore.CYAN}ℹ️  {msg}"); log(f"INFO: {msg}")
-def print_warning(msg): print(f"{Fore.YELLOW}⚠️  {msg}"); log(f"WARNING: {msg}")
-def print_error(msg): print(f"{Fore.RED}❌ {msg}"); log(f"ERROR: {msg}")
+def print_success(msg): print(f"{GREEN}✅ {msg} {RESET}"); log(f"SUCCESS: {msg}")
+def print_info(msg): print(f"{CYAN}ℹ️  {msg} {RESET}"); log(f"INFO: {msg}")
+def print_warning(msg): print(f"{YELLOW}⚠️  {msg} {RESET}"); log(f"WARNING: {msg}")
+def print_error(msg): print(f"{RED}❌ {msg} {RESET}"); log(f"ERROR: {msg}")
 
 # --- Banner ---
 def print_banner():
     if platform.system() == "Windows":
-        color = Fore.BLUE
+        color = BLUE
         os_name = "Windows"
     elif platform.system() == "Darwin":
-        color = Fore.MAGENTA
+        color = MAGENTA
         os_name = "macOS"
     else:  # Linux
-        color = Fore.RED
+        color = RED
         os_name = "Linux"
     
-    banner = rf"""{color}{Style.BRIGHT}
+    banner = rf"""{RED}
    ____   _____          ______ _      _____ _____ 
   / __ \ / ____|        |  ____| |    |_   _|  __ \
  | |  | | (___    ___   | |__  | |      | | | |__) |
@@ -62,10 +70,8 @@ def print_banner():
  | |__| |____) |        | |    | |____ _| |_| |     
   \____/|_____/         |_|    |______|_____|_|   
     
-{Style.RESET_ALL}
-{Style.BRIGHT}         Welcome to OS FLIP 
+{RESET}                Welcome to OS FLIP 
                             By - AK({os_name})
-{Style.RESET_ALL}
 """
     print(banner)
     log(f"Launched OS Flip ({os_name})")
@@ -77,18 +83,18 @@ def launch_in_new_terminal():
     script_path = os.path.abspath(__file__)
     
     if current_os == "Windows":
-        subprocess.Popen(f'start cmd /k python "{script_path}" --no-terminal-launch', shell=True)
+        subprocess.Popen(f'start cmd /k python "{script_path}" -nt', shell=True)
         sys.exit(0)
     elif current_os == "Darwin":
         subprocess.Popen([
             "osascript",
-            "-e", f'tell app "Terminal" to do script "python3 \'{script_path}\' --no-terminal-launch"'
+            "-e", f'tell app "Terminal" to do script "python3 \'{script_path}\' -nt"'
         ])
         sys.exit(0)
     elif current_os == "Linux":
         # 1. Define the executable and arguments for launching the script
         python_executable = sys.executable
-        script_command = [python_executable, script_path, "--no-terminal-launch"]
+        script_command = [python_executable, script_path, "-nt"] 
         
         # 2. Check environment for user-defined default terminal ($TERMINAL)
         default_term_cmd = os.environ.get("TERMINAL")
@@ -115,7 +121,7 @@ def launch_in_new_terminal():
                     # Group 1: Terminals that typically require the command as a single, quoted shell string
                     if term in ("gnome-terminal", "konsole", "xfce4-terminal", "mate-terminal", "lxterminal", "deepin-terminal", "qterminal", "eterm", "mlterm"):
                         # We use sys.executable and quotes for shell compatibility
-                        full_cmd_string = f'{python_executable} "{script_path}" --no-terminal-launch'
+                        full_cmd_string = f'{python_executable} "{script_path}" -nt'
                         subprocess.Popen([term, "-e", full_cmd_string])
                     
                     # Group 2: Terminals that require the command and arguments as separate items
@@ -497,153 +503,202 @@ def reboot_macos():
         return False
 
 # --- Main Menu ---
-def main():
-    # Check if we should launch in new terminal
-    if "--no-terminal-launch" not in sys.argv:
-        launch_in_new_terminal()
+class MAIN_MENU:
+    def __init__(self):
+        self.current_os = platform.system()
+        self.current_default = None
+        self.entries = None
+        self.identifiers = None
+        self.current_default_id = None
+        self.current_default_display_name = None
 
-    
-    print_banner()
-    
-    try:
-        current_os = platform.system()
-        if current_os not in ("Linux", "Windows", "Darwin"):
+    def os_check(self):
+        if self.current_os not in ("Linux", "Windows", "Darwin"):
             print_error("This script only runs on Linux, Windows, or macOS systems.")
             sys.exit(1)
             
         exit_if_not_admin()
 
-        if current_os == "Linux":
+    def get_boot_entires(self):
+        if self.current_os == "Linux":
             global GRUB_UPDATE_CMD
             GRUB_UPDATE_CMD = get_grub_update_cmd()
             if not ensure_os_prober_enabled():
                 print_warning("Continuing with limited functionality")
-            entries = get_linux_boot_entries()
-            identifiers = None
-            current_default = get_current_linux_default_os()
-        elif current_os == "Windows":
-            entries, identifiers = get_windows_boot_entries()
-            current_default_id = get_current_windows_default_os()
-            current_default = entries[identifiers.index(current_default_id)] if current_default_id and current_default_id in identifiers else "Unknown"
+            self.entries = get_linux_boot_entries()
+            self.current_default = get_current_linux_default_os()
+        elif self.current_os == "Windows":
+            self.entries, self.identifiers = get_windows_boot_entries()
+            self.current_default_id = get_current_windows_default_os()
+            self.current_default = self.entries[self.identifiers.index(self.current_default_id)] if self.current_default_id and self.current_default_id in self.identifiers else "Unknown"
         else:  # macOS
-            entries, identifiers = get_macos_boot_entries()
-            current_default_display_name = get_current_macos_default_os()
+            self.entries, self.identifiers = get_macos_boot_entries()
+            self.current_default_display_name = get_current_macos_default_os()
             # Note: macOS default is complex. We use the display name for comparison.
-            current_default = current_default_display_name
+            self.current_default = self.current_default_display_name
 
-        if not entries:
-            print_error("No boot entries found. Cannot continue.")
-            return
-
-        print(f"\n{Fore.CYAN}📜 Available Boot Entries:{Style.RESET_ALL}")
-        if current_os == "Linux":
-            for idx, entry in enumerate(entries):
-                current_marker = " (Current Default)" if entry == current_default else ""
+    def show_boot_entries(self):
+        if self.current_os == "Linux":
+            for idx, entry in enumerate(self.entries):
+                current_marker = " (Current Default)" if entry == self.current_default else ""
                 print(f"  {idx + 1}. {entry}{current_marker}")
         else:  # Windows or macOS
-            for idx, (entry, identifier) in enumerate(zip(entries, identifiers)):
+            for idx, (entry, identifier) in enumerate(zip(self.entries, self.identifiers)):
                 current_marker = ""
-                if current_os == "Windows":
-                    current_marker = " (Current Default)" if identifier == current_default_id else ""
-                elif current_os == "Darwin":
+                if self.current_os == "Windows":
+                    current_marker = " (Current Default)" if identifier == self.current_default_id else ""
+                elif self.current_os == "Darwin":
                     # Check if the entry name is contained in the descriptive current default path
-                    if identifier == "BOOTCAMP" and "BOOTCAMP" in current_default_display_name:
+                    if identifier == "BOOTCAMP" and "BOOTCAMP" in self.current_default_display_name:
                         current_marker = " (Current Default)"
-                    elif identifier != "BOOTCAMP" and identifier in current_default_display_name:
+                    elif identifier != "BOOTCAMP" and identifier in self.current_default_display_name:
                         current_marker = " (Current Default)"
 
                 print(f"  {idx + 1}. {entry}{current_marker}")
 
-        print(f"""\n{Fore.CYAN}⚙️  Options:
-  1. Set default boot OS
-  2. Flip OS
-  3. Exit{Style.RESET_ALL}""")
+
+class Operation:
+    def __init__(self, menu, choice):
+        self.menu = menu
+        self.selected_os = menu.entries[choice]
+        
+        if menu.identifiers:
+            self.selected_id = menu.identifiers[choice]
+        else:
+            self.selected_id = None  
+        
+    def windows_set_default(self):
+        print_info(f"Current default: {self.menu.current_default}")
+        if set_windows_default_os(self.selected_id):
+            print_success(f"Default OS set to: {self.selected_os}")
+            reboot = input("🔁 Flip now? (y/N): ").strip().lower()
+            if reboot == "y":
+                subprocess.run(["shutdown", "/r", "/t", "0"])
+
+    def windows_flip(self):
+        print_info(f"Rebooting into: {self.selected_os}...")
+        if set_windows_default_os(self.selected_id):
+            subprocess.run(["shutdown", "/r", "/t", "0"])
+
+    def macos_set_default(self):
+        print_info(f"Current default: {self.menu.current_default_display_name}")
+        if set_macos_default_os(self.selected_id):
+            print_success(f"Default OS set to: {self.selected_os}")
+            reboot = input("🔁 Flip now? (y/N): ").strip().lower()
+            if reboot == "y":
+                reboot_macos()
+
+    def macos_flip(self):
+        print_info(f"Rebooting into: {self.selected_os} (One-time and default boot are the same on macOS)...")
+        if set_macos_default_os(self.selected_id):
+            reboot_macos()
+
+    def linux_set_default(self):
+        print_info(f"Current default: {self.menu.current_default}")
+        if set_linux_default_os(self.selected_os):
+            print_success(f"Default OS set to: {self.selected_os}")
+            reboot = input("🔁 Flip now? (y/N): ").strip().lower()
+            if reboot == "y":
+                subprocess.run(["reboot"])
+
+    def linux_flip(self):
+        print_info(f"Flip into: {self.selected_os}")
+        grub_reboot_cmd = shutil.which("grub-reboot") or shutil.which("grub2-reboot")
+        
+        if not grub_reboot_cmd:
+            print_error("❌ Neither 'grub-reboot' nor 'grub2-reboot' found")
+            print_info("💡 Install with: e.g., sudo apt install grub2-common (Debian) or sudo pacman -S grub (Arch)")
+            return
 
         try:
-            option = int(input("\nChoose an option (1-3): ").strip())
-            if option not in [1, 2, 3]:
-                print_error("Invalid option.")
-                return
-            if option == 3:
-                print_info("Exiting OS Flip.")
-                sys.exit(0)
-                return
+            subprocess.run([grub_reboot_cmd, self.selected_os], check=True)
+            print_success("Temporary boot set. Rebooting...")
+            subprocess.run(["reboot"])
+        except subprocess.CalledProcessError as e:
+            print_error(f"Failed to set temporary boot: {e}")
 
-            choice = int(input("Select OS number: ").strip()) - 1
-            if choice < 0 or choice >= len(entries):
-                print_error("Invalid OS selection.")
-                return
+def list_boot_entires():
+    menu = MAIN_MENU()
+    menu.os_check()
+    menu.get_boot_entires()
+    menu.show_boot_entries()
+    sys.exit(0)
 
-            if current_os == "Linux":
-                selected_os = entries[choice]
-                print_info(f"Selected: {selected_os}")
+def run_operation():
+    if not args.no_terminal:
+        launch_in_new_terminal()
 
-                if option == 1:
-                    print_info(f"Current default: {current_default}")
-                    if set_linux_default_os(selected_os):
-                        print_success(f"Default OS set to: {selected_os}")
-                        reboot = input("🔁 Flip now? (y/N): ").strip().lower()
-                        if reboot == "y":
-                            subprocess.run(["reboot"])
-                elif option == 2:
-                    print_info(f"Flip into: {selected_os}")
-                    grub_reboot_cmd = shutil.which("grub-reboot") or shutil.which("grub2-reboot")
-                    
-                    if not grub_reboot_cmd:
-                        print_error("❌ Neither 'grub-reboot' nor 'grub2-reboot' found")
-                        print_info("💡 Install with: e.g., sudo apt install grub2-common (Debian) or sudo pacman -S grub (Arch)")
-                        return
+    menu = MAIN_MENU()
+    menu.os_check()
+    menu.get_boot_entires()
 
-                    try:
-                        subprocess.run([grub_reboot_cmd, selected_os], check=True)
-                        print_success("Temporary boot set. Rebooting...")
-                        subprocess.run(["reboot"])
-                    except subprocess.CalledProcessError as e:
-                        print_error(f"Failed to set temporary boot: {e}")
-                        
-            elif current_os == "Windows":
-                selected_os = entries[choice]
-                selected_id = identifiers[choice]
-                print_info(f"Selected: {selected_os}")
+    if not menu.entries:
+        print_error("No boot entries found.")
+        sys.exit(1)
 
-                if option == 1:
-                    print_info(f"Current default: {current_default}")
-                    if set_windows_default_os(selected_id):
-                        print_success(f"Default OS set to: {selected_os}")
-                        reboot = input("🔁 Flip now? (y/N): ").strip().lower()
-                        if reboot == "y":
-                            subprocess.run(["shutdown", "/r", "/t", "0"])
-                elif option == 2:
-                    print_info(f"Rebooting into: {selected_os}...")
-                    if set_windows_default_os(selected_id):
-                        subprocess.run(["shutdown", "/r", "/t", "0"])
-            else:  # macOS
-                selected_os = entries[choice]
-                selected_id = identifiers[choice]
-                print_info(f"Selected: {selected_os}")
+    menu.show_boot_entries()
 
-                if option == 1:
-                    print_info(f"Current default: {current_default_display_name}")
-                    if set_macos_default_os(selected_id):
-                        print_success(f"Default OS set to: {selected_os}")
-                        reboot = input("🔁 Flip now? (y/N): ").strip().lower()
-                        if reboot == "y":
-                            reboot_macos()
-                elif option == 2:
-                    print_info(f"Rebooting into: {selected_os} (One-time and default boot are the same on macOS)...")
-                    if set_macos_default_os(selected_id):
-                        reboot_macos()
+    # ---- FLIP ----
+    if args.flip is not None:
+        choice = args.flip-1
 
-        except ValueError:
-            print_error("Invalid input. Please enter a number.")
+        if not (0 <= choice < len(menu.entries)):
+            print_error("Invalid OS selection.")
+            sys.exit(1)
+
+        op = Operation(menu, choice)
+
+        if menu.current_os == "Linux":
+            op.linux_flip()
+        elif menu.current_os == "Windows":
+            op.windows_flip()
+        else:
+            op.macos_flip()
+
+    # ---- SET DEFAULT ----
+    elif args.set_default is not None:
+        choice = args.set_default - 1
+
+        if not (0 <= choice < len(menu.entries)):
+            print_error("Invalid OS selection.")
+            sys.exit(1)
+
+        op = Operation(menu, choice)
+
+        if menu.current_os == "Linux":
+            op.linux_set_default()
+        elif menu.current_os == "Windows":
+            op.windows_set_default()
+        else:
+            op.macos_set_default()
+
+def files_clean():
+    print("function not implemened yet")
+
+
+if __name__ == "__main__":
+    print_banner()
+
+    try:
+        if args.clean:
+            files_clean()
+        
+        elif args.list:
+            list_boot_entires()
+
+        elif args.flip is not None or args.set_default is not None:
+            run_operation()
+
+        else:
+            print_error("No operation specified.")
+            time.sleep(1)
+            sys.exit(1)
 
     except KeyboardInterrupt:
         print_warning("\nOperation cancelled by user.")
         sys.exit(1)
+
     except Exception as e:
-        print_error(f"An unexpected error occurred: {e}")
+        print_error(f"An Unexpected error occurred: {e}")
         log(f"CRITICAL ERROR: {e}")
         sys.exit(1)
-
-if __name__ == "__main__":
-    main()
