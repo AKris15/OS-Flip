@@ -675,6 +675,27 @@ def run_operation():
 def files_clean():
     print("function not implemened yet")
 
+def default():
+    menu = MAIN_MENU()
+    menu.os_check()
+    menu.get_boot_entires()
+
+    if not menu.entries:
+        print_error("No boot entries found.")
+        sys.exit(1)
+
+    menu.show_boot_entries()
+
+    choice = int(input(f"""\n Enter the value for the OS you want to boot into :
+    (eg :   3. Arch Linux (6.17.11-300.x86_64)), enter -> 3: """))
+    op = Operation(menu, choice)
+
+    if menu.current_os == "Linux":
+        op.linux_flip()
+    elif menu.current_os == "Windows":
+        op.windows_flip()
+    else:
+        op.macos_flip()
 
 if __name__ == "__main__":
     print_banner()
@@ -690,9 +711,7 @@ if __name__ == "__main__":
             run_operation()
 
         else:
-            print_error("No operation specified.")
-            time.sleep(1)
-            sys.exit(1)
+            default()
 
     except KeyboardInterrupt:
         print_warning("\nOperation cancelled by user.")
