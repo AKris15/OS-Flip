@@ -688,7 +688,7 @@ def default():
 
     choice = int(input(f"""\n Enter the value for the OS you want to boot into :
     (eg :   3. Arch Linux (6.17.11-300.x86_64)), enter -> 3: """))
-    op = Operation(menu, choice)
+    op = Operation(menu, choice - 1)
 
     if menu.current_os == "Linux":
         op.linux_flip()
