@@ -625,7 +625,7 @@ def list_boot_entires():
     sys.exit(0)
 
 def run_operation():
-    if not args.no_terminal:
+    if not args.no_terminal and not sys.stdin.isatty():
         launch_in_new_terminal()
 
     menu = MAIN_MENU()
