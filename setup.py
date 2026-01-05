@@ -12,7 +12,7 @@ setup(
     license="MIT",
     packages=find_packages(),
     include_package_data=True,
-    install_requires=["colorama"],
+    install_requires=["argparse"],
     entry_points={
         "console_scripts": [
             "os-flip=os_flip.__main__:main"
