@@ -684,18 +684,57 @@ def default():
         print_error("No boot entries found.")
         sys.exit(1)
 
+    print("\n📜 Available Boot Entries:")
     menu.show_boot_entries()
 
-    choice = int(input(f"""\n Enter the value for the OS you want to boot into :
-    (eg :   3. Arch Linux (6.17.11-300.x86_64)), enter -> 3: """))
-    op = Operation(menu, choice - 1)
+    print("""
+⚙️  What do you want to do?
+  1. Set default boot OS
+  2. Flip OS (one-time)
+  3. Exit
+""")
 
-    if menu.current_os == "Linux":
-        op.linux_flip()
-    elif menu.current_os == "Windows":
-        op.windows_flip()
-    else:
-        op.macos_flip()
+    try:
+        action = int(input("Enter choice (1/2/3): ").strip())
+    except ValueError:
+        print_error("Invalid input.")
+        sys.exit(1)
+
+    if action == 3:
+        print_info("Exiting.")
+        sys.exit(0)
+
+    if action not in (1, 2):
+        print_error("Invalid option.")
+        sys.exit(1)
+
+    try:
+        choice = int(input("\nEnter OS number: ").strip()) - 1
+    except ValueError:
+        print_error("Invalid OS selection.")
+        sys.exit(1)
+
+    if not (0 <= choice < len(menu.entries)):
+        print_error("Invalid OS selection.")
+        sys.exit(1)
+
+    op = Operation(menu, choice)
+
+    if action == 1:
+        if menu.current_os == "Linux":
+            op.linux_set_default()
+        elif menu.current_os == "Windows":
+            op.windows_set_default()
+        else:
+            op.macos_set_default()
+
+    elif action == 2:
+        if menu.current_os == "Linux":
+            op.linux_flip()
+        elif menu.current_os == "Windows":
+            op.windows_flip()
+        else:
+            op.macos_flip()
 
 def main():
     print_banner()
