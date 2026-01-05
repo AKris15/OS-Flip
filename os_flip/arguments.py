@@ -15,8 +15,7 @@ parser = argparse.ArgumentParser(
       * Configure the default boot option 
       * Perform a one-time boot into another OS """,
     formatter_class=argparse.RawTextHelpFormatter,
-    epilog="Created by : https://akris.is-a.dev ",
-    color=True
+    epilog="Created by : https://akris.is-a.dev "
 )
 
 # List available boot entries
