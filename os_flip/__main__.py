@@ -697,7 +697,7 @@ def default():
     else:
         op.macos_flip()
 
-if __name__ == "__main__":
+def main():
     print_banner()
 
     try:
@@ -721,3 +721,7 @@ if __name__ == "__main__":
         print_error(f"An Unexpected error occurred: {e}")
         log(f"CRITICAL ERROR: {e}")
         sys.exit(1)
+
+if __name__ == "__main__":
+    main()
+
