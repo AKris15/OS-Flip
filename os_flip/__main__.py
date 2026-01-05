@@ -323,7 +323,7 @@ def set_linux_default_os(entry_name):
     found = False
     for i, line in enumerate(lines):
         if line.startswith("GRUB_DEFAULT="):
-            lines[i] = f'GRUB_DEFAULT="{entry_name}"\n'
+            lines[i] = f'GRUB_DEFAULT={entry_name}\n'
             found = True
             break
     
@@ -595,7 +595,7 @@ class Operation:
 
     def linux_set_default(self):
         print_info(f"Current default: {self.menu.current_default}")
-        if set_linux_default_os(self.selected_os):
+        if set_linux_default_os(str(choice)):
             print_success(f"Default OS set to: {self.selected_os}")
             reboot = input("🔁 Flip now? (y/N): ").strip().lower()
             if reboot == "y":
